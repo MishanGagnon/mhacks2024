@@ -1,19 +1,47 @@
-import fs from 'fs/promises';
+import fsPromises from 'fs/promises';
+import fs from 'fs';
 import { fromBuffer } from 'pdf2pic';
 import path from 'path';
 import { Buffer } from 'node:buffer';
 import { PDFDocument } from 'pdf-lib';
 import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
+import { generateObject, generateText } from 'ai';
+import { z } from 'zod';
 
 async function main() {
-  const { text } = await generateText({
+  const { object } = await generateObject({
     model: openai('gpt-4o-mini'),
-    system: 'You are a friendly assistant!',
-    prompt: 'Why is the sky blue?',
+    maxTokens: 2048,
+    schema: z.object({
+      courses: z.array(
+        z.object({
+          courseCode: z.string(),
+          courseName: z.string(),
+          SemesterYear: z.string(),
+          Grade: z.string(),
+          Credits: z.number(),
+          Completion: z.string()
+        }),
+      ),
+    }),
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: 'list all the stamps in these passport pages?',
+          },
+          {
+            type: 'image',
+            image: fs.readFileSync(path.join(process.cwd(), 'uploads','AuditChecklist_22783726_2024-28-9--12-36-58.1.jpg')),
+          },
+        ],
+      },
+    ],
   });
 
-  return text
+  console.log(object);
 }
 
 export async function POST(req: Request) {
@@ -23,7 +51,7 @@ export async function POST(req: Request) {
 
   const uploadDir = path.join(process.cwd(), 'uploads');
   const filePath = path.join(uploadDir, file.name);
-  await fs.writeFile(filePath, buffer);
+  await fsPromises.writeFile(filePath, buffer);
 
   // Load the PDF and get the first page's dimensions
   const pdfDoc = await PDFDocument.load(buffer);
