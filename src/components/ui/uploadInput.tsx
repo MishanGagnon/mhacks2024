@@ -1,14 +1,27 @@
 'use client';
 
-import { useState, ChangeEvent, FormEvent, useRef } from 'react';
+import { useState, ChangeEvent, FormEvent, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from './spinner';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function FileUpload() {
     const [file, setFile] = useState<File | null>(null);
     const [confirm, setConfirm] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [uuid, setUUID] = useState<string | null>(null)
+
+    useEffect(() => {
+        const storedUUID = localStorage.getItem('uuid');
+        if (storedUUID) {
+            setUUID(storedUUID);
+        } else {
+            const newUUID = uuidv4();
+            localStorage.setItem('uuid', newUUID);
+            setUUID(newUUID);
+        }
+    }, []);
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -36,6 +49,7 @@ export default function FileUpload() {
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('uuid', uuid || '');
 
         try {
             const response = await fetch('/api/upload', {
@@ -52,6 +66,9 @@ export default function FileUpload() {
         } finally {
             setIsLoading(false);
         }
+
+        console.log("This is the form data:", formData)
+        console.log("This is the uuid:", uuid)
     };
     
 
