@@ -3,6 +3,18 @@ import { fromBuffer } from 'pdf2pic';
 import path from 'path';
 import { Buffer } from 'node:buffer';
 import { PDFDocument } from 'pdf-lib';
+import { openai } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+
+async function main() {
+  const { text } = await generateText({
+    model: openai('gpt-4o-mini'),
+    system: 'You are a friendly assistant!',
+    prompt: 'Why is the sky blue?',
+  });
+
+  return text
+}
 
 export async function POST(req: Request) {
   const data = await req.formData();
@@ -30,5 +42,9 @@ export async function POST(req: Request) {
 
   fromBuffer(buffer, options).bulk(-1, { responseType: 'image' });
 
+  console.log("success image converted")
+  let text = await main();
+
+  console.log("next is text from ai: " + text)
   return Response.json({ cool: 'true' });
 }

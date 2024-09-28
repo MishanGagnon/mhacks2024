@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.63",
     "@radix-ui/react-slot": "^1.1.0",
     "@typescript-eslint/parser": "^8.7.0",
+    "ai": "^3.4.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.446.0",
