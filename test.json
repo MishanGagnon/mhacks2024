@@ -1,24 +1,6 @@
 [
     {
         "subject": "EECS",
-        "catalog_number": "110",
-        "course_code": "EECS110",
-        "course_code_spaced": "EECS 110",
-        "title": "Discover Computer Science",
-        "description": "Introduction to basic CS concepts (variables, conditionals, loops, functions) using an introductory programming language, such a Python. Students interact with researchers and computing professionals to learn about real-world, interdisciplinary applications of CS. Intended for students without prior programming experience to (optionally take prior to EECS 183 or ENGR 101.",
-        "enforced_prereqs": " ",
-        "advisory_prereqs": " ",
-        "max_credits": 2.0,
-        "cross_listed_courses": [],
-        "lsa_details": [],
-        "Desire_to_take": "72.0",
-        "Understanding": "87.0",
-        "Workload": "8.0",
-        "Expectations": "80.0",
-        "Increased_Interest": "63.0"
-    },
-    {
-        "subject": "EECS",
         "catalog_number": "183",
         "course_code": "EECS183",
         "course_code_spaced": "EECS 183",
@@ -52,24 +34,6 @@
         "Workload": "8.0",
         "Expectations": "80.0",
         "Increased_Interest": "63.0"
-    },
-    {
-        "subject": "EECS",
-        "catalog_number": "183",
-        "course_code": "EECS183",
-        "course_code_spaced": "EECS 183",
-        "title": "Elementary Programming Concepts",
-        "description": "Fundamental concepts and skills of programming in a high level language.  Flow of control:  selection, iteration, subprograms.  Data structures:  strings, arrays, records, lists, tables.  Algorithms using selection and iteration (decision making, finding maxima/minima, searching, sorting, simulation, etc.).  Good program design, structure, and style are emphasized.  Testing and debugging. Not intended for Engineering students (who should take ENGR 101), nor for CS majors in LSA who qualify for EECS 280.",
-        "enforced_prereqs": " ",
-        "advisory_prereqs": " ",
-        "max_credits": 4.0,
-        "cross_listed_courses": [],
-        "lsa_details": [],
-        "Desire_to_take": "81.0",
-        "Understanding": "94.0",
-        "Workload": "50.0",
-        "Expectations": "91.0",
-        "Increased_Interest": "81.0"
     },
     {
         "subject": "EECS",

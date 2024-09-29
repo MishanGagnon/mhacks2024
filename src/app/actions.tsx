@@ -1,6 +1,8 @@
 import { Message, TextStreamMessage } from "@/components/ui/message";
 import { openai } from "@ai-sdk/openai";
 import { CoreMessage, generateId } from "ai";
+import Fuse from 'fuse.js';
+
 import {
   createAI,
   createStreamableValue,
@@ -19,7 +21,7 @@ import { CourseCardProps } from "@/components/ui/course-card";
 import MetricBarChart from "@/components/ui/bar-chart";
 
 
-const choppedData  = coursesData.slice(0,30)
+const choppedData  = coursesData.slice(0,coursesData.length)
 const sendMessage = async (message: string) => {
   "use server"
   const messages = getMutableAIState<typeof AI>("messages");
@@ -32,16 +34,25 @@ const sendMessage = async (message: string) => {
 
   const contentStream = createStreamableValue("");
   const textComponent = <TextStreamMessage content={contentStream.value} />;
-
-  const classContext = `${JSON.stringify(choppedData)} `;
+  const options = {
+    keys: ['course_code'], // Specify the keys to search in
+    threshold: 0.3,        // Adjust the threshold for fuzzy matching (0.0 = exact match, 1.0 = match anything)
+  };
+  
+  // Initialize Fuse with your data and options
+  const fuse = new Fuse(choppedData, options);
+  let string = choppedData.map(course => {
+    return `Course: ${course.course_code}, Title ${course.title}, Description: ${course.description}, Workload: ${course.Workload}%, Increase Interest: ${course.Increased_Interest}, Credits : ${course.max_credits}, Desire to Take: ${course.Desire_to_take}% Enforced Prerecs: ${course.enforced_prereqs}`;
+  }).join('\n')
   const { value: stream } = await streamUI({
     model: openai("gpt-4o-mini"),
     
     system: `\
       - ${context}
       - you are a friendly course guide and scheduling assistant
-      - here is some context about classes: ${classContext}
+      - This is background info on classes: ${string}
       - advise students on what class to take based on context. Do not consider personal interests and career goals
+      - you must follow the guidelines given by the tool descriptions, failing to use the right tool would be bad
     `,
     
     messages: messages.get() as CoreMessage[],
@@ -61,7 +72,7 @@ const sendMessage = async (message: string) => {
     },
     tools: {
       compareCourses: {
-        description: "if the word COMPARE is used use this tool",
+        description: "This tool compares two courses by giving details about both. if the word COMPARE is used this tool is the best option. ",
         parameters: z.object({
           courseCodeForMostRecentlyMentionedCourse: z.string(),
           courseCodeForSecondMostRecentlyMentionedCourse: z.string(),
@@ -70,12 +81,19 @@ const sendMessage = async (message: string) => {
           const toolCallId = generateId();
       
           // Find course data for both course codes
-          const course1 = choppedData.find(course => course.course_code === courseCodeForMostRecentlyMentionedCourse);
-          const course2 = choppedData.find(course => course.course_code === courseCodeForSecondMostRecentlyMentionedCourse);
+          const searchString1 = courseCodeForMostRecentlyMentionedCourse;
+          const searchString2 = courseCodeForSecondMostRecentlyMentionedCourse;
+
+          // Perform fuzzy search
+          const result1 = fuse.search(searchString1);
+          const result2 = fuse.search(searchString2);
+
+          const course1 = result1.length > 0 ? result1[0].item : null;
+          const course2 = result2.length > 0 ? result2[0].item : null;
           
           if (!course1 || !course2) {
             return (
-              <Message role="assistant" content={<p>One or both courses not found.</p>} />
+              <Message role="assistant" content={<p>I'm not exactly sure which course you're referring to, can you specify.</p>} />
             );
           }
           const comparisonPrompt = `Compare the following courses:
@@ -174,17 +192,17 @@ const sendMessage = async (message: string) => {
         },
       },
       getMetricsBarChart: {
-        description: "Return a bar chart for course statistics like Workload or Increased Interest",
+        description: "Return a bar chart for course statistics like Workload, Increased Interest, Desire to take, Understanding, and Expectations",
         parameters: z.object({
           courseCodes: z.array(z.string()), // Accept an array of course codes for comparison
-          metricType: z.enum(['Workload', 'Increased Interest']), // Specify which metric to return
+          metricType: z.enum(['Workload', 'Increased Interest', 'Desire_to_take', 'Understanding', 'Expectations']), // Updated metric name
         }),
         generate: async function* ({ courseCodes, metricType }) {
           const toolCallId = generateId();
-          
+      
           // Filter the courses based on the provided courseCodes
           const selectedCourses = choppedData.filter(course => courseCodes.includes(course.course_code));
-          
+      
           if (selectedCourses.length === 0) {
             return (
               <Message role="assistant" content={<p>No courses found for the provided codes.</p>} />
@@ -195,10 +213,17 @@ const sendMessage = async (message: string) => {
           const metrics = selectedCourses.map(course => {
             const workload = course.Workload ? parseFloat(course.Workload) : 0; // Default to 0 if undefined
             const increasedInterest = course["Increased_Interest"] ? parseFloat(course["Increased_Interest"]) : 0; // Default to 0 if undefined
+            const desireToTake = course["Desire_to_take"] ? parseFloat(course["Desire_to_take"]) : 0; // Default to 0 if undefined
+            const understanding = course["Understanding"] ? parseFloat(course["Understanding"]) : 0; // Default to 0 if undefined
+            const expectations = course["Expectations"] ? parseFloat(course["Expectations"]) : 0; // Default to 0 if undefined
             
             return {
               label: course.course_code, // Use course code as label
-              value: metricType === 'Workload' ? workload : increasedInterest,
+              value: metricType === 'Workload' ? workload 
+                     : metricType === 'Increased Interest' ? increasedInterest
+                     : metricType === 'Desire_to_take' ? desireToTake
+                     : metricType === 'Understanding' ? understanding
+                     : expectations, // Default to Expectations
             };
           });
       
@@ -226,7 +251,7 @@ const sendMessage = async (message: string) => {
                   type: "tool-result",
                   toolName: "getMetricsBarChart",
                   toolCallId,
-                  result: `Here is the bar chart for ${metricType === 'Workload' ? 'Workload' : 'Increased_Interest'} metrics.`,
+                  result: `Here is the bar chart for ${metricType} metrics.`,
                 },
               ],
             },
@@ -235,103 +260,103 @@ const sendMessage = async (message: string) => {
           return (
             <Message role="assistant" content={
               <>
-                <h3>{metricType === 'Workload' ? 'Workload' : 'Increased_Interest'} Comparison</h3>
+                <h3>{metricType} Comparison</h3>
                 {barChart}
               </>
             } />
           );
         },
-      },
-      getCourseCard: {
-        description: "If someone asks for details about a single course give use THIS tool",
-        parameters: z.object({
-          courseCode: z.string(),
-        }),
-        generate: async function* ({ courseCode }) {
-          const course = choppedData.find(course => course.course_code === courseCode);
-          const toolCallId = generateId();
-          
-          if (!course) {
-            return (
-              <Message role="assistant" content={<p>course not found.</p>} />
-            );
-          }
-          const courseCardString1 = `
-          Course Code: ${course.course_code}
-          Course Name: ${course.title}
-          
-          Workload: ${course.Workload}
-          Description: ${course.description}
-          `
-          const cardPrompt = `Give a brief description of this course
-          ${course.title} ${course.course_code}
-          `;
-
-          // Call the AI model for a summary comparison
-          const { value: cardSummary } = await streamUI({
-          model: openai("gpt-4o-mini"),
-          
-          messages: [
-          {
-            role: "user",
-            content: cardPrompt,
-          },
-          ],
-          });
-
-          // Create course card components
-          const courseCard1 = (
-            <CourseCard 
-              course = {course}
-            />
-          );
-
-          messages.done([
-            ...(messages.get() as CoreMessage[]),
-            {
-              role: "assistant",
-              content: [
-                {
-                  type: "tool-call",
-                  toolCallId,
-                  toolName: "compareCourses",
-                  args: { courseCode },
-                },
-              ],
-            },
-            {
-              role: "tool",
-              content: [
-                {
-                  type: "tool-result",
-                  toolName: "compareCourses",
-                  toolCallId,
-                  result: `${courseCardString1}`,
-                },
-              ],
-            },
-            {
-              role: "user",
-              content : cardPrompt
-            }
-          ]);
-
-          if (course) {
-            return (<>
-              <Message role="assistant" content={<CourseCard 
-                course = {course}
-              />} />
-
-              <Message role="assistant" content={cardSummary} />
-              </>
-            );
-          } else {
-            return (
-              <Message role="assistant" content={<p>Course not found.</p>} />
-            );
-          }
-        },
       },      
+      // getCourseCard: {
+      //   description: "If someone asks for details about a single course give use THIS tool",
+      //   parameters: z.object({
+      //     courseCode: z.string(),
+      //   }),
+      //   generate: async function* ({ courseCode }) {
+      //     const course = choppedData.find(course => course.course_code === courseCode);
+      //     const toolCallId = generateId();
+          
+      //     if (!course) {
+      //       return (
+      //         <Message role="assistant" content={<p>course not found.</p>} />
+      //       );
+      //     }
+      //     const courseCardString1 = `
+      //     Course Code: ${course.course_code}
+      //     Course Name: ${course.title}
+          
+      //     Workload: ${course.Workload}
+      //     Description: ${course.description}
+      //     `
+      //     const cardPrompt = `Give a brief description of this course
+      //     ${course.title} ${course.course_code}
+      //     `;
+
+      //     // Call the AI model for a summary comparison
+      //     const { value: cardSummary } = await streamUI({
+      //     model: openai("gpt-4o-mini"),
+          
+      //     messages: [
+      //     {
+      //       role: "user",
+      //       content: cardPrompt,
+      //     },
+      //     ],
+      //     });
+
+      //     // Create course card components
+      //     const courseCard1 = (
+      //       <CourseCard 
+      //         course = {course}
+      //       />
+      //     );
+
+      //     messages.done([
+      //       ...(messages.get() as CoreMessage[]),
+      //       {
+      //         role: "assistant",
+      //         content: [
+      //           {
+      //             type: "tool-call",
+      //             toolCallId,
+      //             toolName: "compareCourses",
+      //             args: { courseCode },
+      //           },
+      //         ],
+      //       },
+      //       {
+      //         role: "tool",
+      //         content: [
+      //           {
+      //             type: "tool-result",
+      //             toolName: "compareCourses",
+      //             toolCallId,
+      //             result: `${courseCardString1}`,
+      //           },
+      //         ],
+      //       },
+      //       {
+      //         role: "user",
+      //         content : cardPrompt
+      //       }
+      //     ]);
+
+      //     if (course) {
+      //       return (<>
+      //         <Message role="assistant" content={<CourseCard 
+      //           course = {course}
+      //         />} />
+
+      //         <Message role="assistant" content={cardSummary} />
+      //         </>
+      //       );
+      //     } else {
+      //       return (
+      //         <Message role="assistant" content={<p>Course not found.</p>} />
+      //       );
+      //     }
+      //   },
+      // },      
     },
   });
 

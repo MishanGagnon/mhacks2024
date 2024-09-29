@@ -22,7 +22,7 @@ const MetricBarChart: React.FC<MetricBarChartProps> = ({ metrics }) => {
         </div>
       </div>
 
-      <div className="flex flex-row justify-between w-full h-[150px] items-end">
+      <div className="flex flex-row justify-center  w-full h-[150px] items-end">
         {metrics.map((metric) => (
           <div key={metric.label} className="text-sm flex flex-col items-center gap-1">
             <motion.div
