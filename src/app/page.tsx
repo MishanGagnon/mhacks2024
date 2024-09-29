@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { LoadingSpinner } from '../components/ui/spinner';
 import FileUpload from '@/components/ui/FileUpload'
+import Chat from "@/components/ui/Chat";
 
 export default function Home() {
   const [uuid, setUUID] = useState<string | null>(null);
@@ -50,7 +51,7 @@ export default function Home() {
   if(exists){
     return <div className="flex flex-row">
         <FileUpload onComplete={()=>{}} doCheckCache={false}/>
-        <div>CHAT INTERFACE</div>
+        <Chat/>
     </div>
   }else{
     return <div>
