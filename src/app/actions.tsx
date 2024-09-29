@@ -226,7 +226,7 @@ const sendMessage = async (message: string) => {
                   type: "tool-result",
                   toolName: "getMetricsBarChart",
                   toolCallId,
-                  result: `Here is the bar chart for ${metricType === 'workload' ? 'Workload' : 'Increased_Interest'} metrics.`,
+                  result: `Here is the bar chart for ${metricType === 'Workload' ? 'Workload' : 'Increased_Interest'} metrics.`,
                 },
               ],
             },
@@ -235,7 +235,7 @@ const sendMessage = async (message: string) => {
           return (
             <Message role="assistant" content={
               <>
-                <h3>{metricType === 'workload' ? 'Workload' : 'Increased_Interest'} Comparison</h3>
+                <h3>{metricType === 'Workload' ? 'Workload' : 'Increased_Interest'} Comparison</h3>
                 {barChart}
               </>
             } />
