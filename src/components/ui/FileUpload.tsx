@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from './spinner';
 import { v4 as uuidv4 } from 'uuid';
+import { json } from 'node:stream/consumers';
 
-export default function FileUpload() {
+export default function FileUpload({ doCheckCache} : any) {
     const [file, setFile] = useState<File | null>(null);
     const [confirm, setConfirm] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -50,6 +51,7 @@ export default function FileUpload() {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('uuid', uuid || '');
+        formData.append('doCheckCache',JSON.stringify(doCheckCache));
 
         try {
             

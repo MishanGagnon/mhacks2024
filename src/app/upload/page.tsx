@@ -1,4 +1,4 @@
-import UploadInput from '../../components/ui/uploadInput'
+import UploadInput from '../../components/ui/FileUpload'
 
 export default function Page() {
   return (

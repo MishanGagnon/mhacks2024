@@ -13,13 +13,16 @@ import { BufferResponse, WriteImageResponse } from 'pdf2pic/dist/types/convertRe
 
 
 
-async function requestPdfCache(uuid : string, filename : string, buffertest : BufferResponse[]) {
-
-
-    const res = await pool.query("SELECT * FROM courses WHERE user_id = $1", [uuid]);
-    if(res.rows.length != 0){
-      //return user cached data
-      return res.rows
+async function requestPdfCache(uuid : string, filename : string, buffertest : BufferResponse[], doCheckCache : boolean) {
+    console.log(doCheckCache,'test')
+    if(doCheckCache){
+      const res = await pool.query("SELECT * FROM courses WHERE user_id = $1", [uuid]);
+      if(res.rows.length != 0){
+        //return user cached data
+        return res.rows
+      }
+    }else{
+      let removeNonCache = await pool.query("DELETE FROM courses WHERE user_id = $1", [uuid]);
     }
 
     const contents : UserContent = buffertest.map( (buffer) => {return {type: 'image', image : buffer.buffer ?? Buffer.alloc(0)}})
@@ -101,6 +104,8 @@ export async function POST(req: Request) {
   const data = await req.formData();
   const file = data.get('file') as File;
   const uuid = data.get('uuid') as string
+  let other = data.get('doCheckCache')
+  let doCheckCache = JSON.parse(other as any) as boolean
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const uploadDir = path.join(process.cwd(), 'uploads');
@@ -127,8 +132,7 @@ export async function POST(req: Request) {
   console.log("This is the buffertest output: ",buffertest)
 
   console.log("success image converted")
-  console.log(buffertest)
-  let text = await requestPdfCache(uuid, path.parse(file.name).name, buffertest);
+  let text = await requestPdfCache(uuid, path.parse(file.name).name, buffertest, doCheckCache);
 
   console.log("next is text from ai: " + text)
   return Response.json(text);
