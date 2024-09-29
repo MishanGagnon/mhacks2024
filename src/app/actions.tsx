@@ -16,9 +16,10 @@ import CourseCard from '@/components/ui/course-card';
 import { div } from "framer-motion/client";
 import Markdown from "react-markdown";
 import { CourseCardProps } from "@/components/ui/course-card";
+import MetricBarChart from "@/components/ui/bar-chart";
 
 
-const choppedData  = coursesData.slice(0,5)
+const choppedData  = coursesData.slice(0,30)
 const sendMessage = async (message: string) => {
   "use server"
   const messages = getMutableAIState<typeof AI>("messages");
@@ -33,7 +34,6 @@ const sendMessage = async (message: string) => {
   const textComponent = <TextStreamMessage content={contentStream.value} />;
 
   const classContext = `${JSON.stringify(choppedData)} `;
-  console.log(context, "CONTEXT")
   const { value: stream } = await streamUI({
     model: openai("gpt-4o-mini"),
     
@@ -171,6 +171,75 @@ const sendMessage = async (message: string) => {
               </>
             } />
           );          
+        },
+      },
+      getMetricsBarChart: {
+        description: "Return a bar chart for course statistics like Workload or Increased Interest",
+        parameters: z.object({
+          courseCodes: z.array(z.string()), // Accept an array of course codes for comparison
+          metricType: z.enum(['workload', 'increasedInterest']), // Specify which metric to return
+        }),
+        generate: async function* ({ courseCodes, metricType }) {
+          const toolCallId = generateId();
+          
+          // Filter the courses based on the provided courseCodes
+          const selectedCourses = choppedData.filter(course => courseCodes.includes(course.course_code));
+          
+          if (selectedCourses.length === 0) {
+            return (
+              <Message role="assistant" content={<p>No courses found for the provided codes.</p>} />
+            );
+          }
+      
+          // Prepare metrics for the selected metric type
+          const metrics = selectedCourses.map(course => {
+            const workload = course.Workload ? parseFloat(course.Workload) : 0; // Default to 0 if undefined
+            const increasedInterest = course["Increased_Interest"] ? parseFloat(course["Increased_Interest"]) : 0; // Default to 0 if undefined
+            
+            return {
+              label: course.course_code, // Use course code as label
+              value: metricType === 'workload' ? workload : increasedInterest,
+            };
+          });
+      
+          // Create MetricBarChart component for the selected metric type
+          const barChart = <MetricBarChart metrics={metrics} />;
+      
+          // Update the messages with the results
+          messages.done([
+            ...(messages.get() as CoreMessage[]),
+            {
+              role: "assistant",
+              content: [
+                {
+                  type: "tool-call",
+                  toolCallId,
+                  toolName: "getMetricsBarChart",
+                  args: { courseCodes, metricType },
+                },
+              ],
+            },
+            {
+              role: "tool",
+              content: [
+                {
+                  type: "tool-result",
+                  toolName: "getMetricsBarChart",
+                  toolCallId,
+                  result: `Here is the bar chart for ${metricType === 'workload' ? 'Workload' : 'Increased_Interest'} metrics.`,
+                },
+              ],
+            },
+          ]);
+      
+          return (
+            <Message role="assistant" content={
+              <>
+                <h3>{metricType === 'workload' ? 'Workload' : 'Increased_Interest'} Comparison</h3>
+                {barChart}
+              </>
+            } />
+          );
         },
       },
       getCourseCard: {
