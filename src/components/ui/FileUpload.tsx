@@ -78,8 +78,11 @@ export default function FileUpload({ onComplete, doCheckCache }: any) {
 
     return (
         <div className="flex flex-col justify-center items-center min-h-screen">
-            <div className="mb-10">
-                <h1 className='text-7xl' style={{ fontFamily: ' , sans-serif' }}>UMazing</h1>
+                      <div className="mb-10">
+                <h1 className='text-7xl font-bold' style={{ fontFamily: ' , sans-serif' }}>
+                    <span className='text-yellow-400'> UM</span>
+                    <span className='text-blue-950'>azing </span>
+                </h1>
             </div>
     
             <div className="rounded-3xl bg-gray-100 p-12">
