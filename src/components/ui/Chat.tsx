@@ -1,16 +1,35 @@
 "use client";
 
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useActions } from "ai/rsc";
+import {getAIState}from "ai/rsc";
+import { useAIState } from 'ai/rsc';
+
 import { Message } from "@/components/ui/message";
 import { useScrollToBottom } from "@/components/ui/use-scroll-to-bottom";
 import { motion } from "framer-motion";
 import { MasonryIcon, VercelIcon } from "@/components/ui/icons";
 import Link from "next/link";
 import PersonAddAlt1RoundedIcon from '@mui/icons-material/PersonAddAlt1Rounded';
-
+import { h1 } from "framer-motion/client";
+import { AI } from "@/app/actions";
+import { CoreMessage } from "ai";
+interface Course {
+  id: string;
+  user_id: string;
+  course_code: string;
+  course_name: string;
+  semester_year: string;
+  grade: string;
+  credits: number;
+  completion: string
+  file_name: string
+  // Add other relevant fields
+}
 export default function Chat() {
   const { sendMessage } = useActions();
+
+  
 
   const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<Array<ReactNode>>([]);
@@ -33,7 +52,85 @@ export default function Chat() {
       action: "Should I take EECS 370 next semester?",
     },
   ];
+  const [AuditData, setAuditData] = useState<Course[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [context, setContext] = useAIState();
+  let auditDataString = 'This is the students grade info about classes they have completed, in progress, and yet to complete, use this context about their performance and classes taken to answer questions when prompted'
+  if(AuditData){
+    
+    console.log(auditDataString)
+  }
+  useEffect(()=>{
+    // console.log(getAIState('context'))
+    console.log(AuditData)
+    // const test = async ()=> {
+      
 
+    if(AuditData){
+      let string = AuditData.map(course => {
+        return `Course: ${course.course_code} - ${course.course_name}, Semester: ${course.semester_year}, Grade: ${course.grade}, Credits: ${course.credits}, Completion: ${course.completion}`;
+      }).join('\n')
+      
+      setContext((prevContext : any) => ({
+        ...prevContext,
+        context: string
+      }));  
+    }
+  },[AuditData])
+
+  useEffect(() => {
+    
+    const fetchAuditData = async () => {
+      try {
+        // Retrieve UUID from localStorage
+        const uuid = localStorage.getItem('uuid');
+
+        if (!uuid) {
+          setError('UUID not found in localStorage.');
+          setLoading(false);
+          return;
+        }
+
+        // Make the POST request to the API endpoint
+        const response = await fetch(`/api/getContext?uuid=${encodeURIComponent(uuid)}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          // Handle HTTP errors
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch audit data.');
+        }
+
+        // Parse the JSON response
+        const data: Course[] = await response.json();
+        setAuditData(data); // Assuming UUID is unique and returns a single course
+
+        if (data.length === 0) {
+          setError('No course found with the provided UUID.');
+        } else {
+          console.log(AuditData,'audit')
+
+        }
+      } catch (err: any) {
+        // Handle network or parsing errors
+        setError(err.message || 'An unexpected error occurred.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuditData();
+  }, []);
+
+  
+  if(loading){
+    <h1>Loading course data</h1>
+  }
   return (
     <div className="flex flex-row justify-center pb-20 h-dvh bg-white dark:bg-zinc-900">
       <div className="flex flex-col justify-between gap-4">

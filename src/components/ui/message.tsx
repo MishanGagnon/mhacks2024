@@ -36,9 +36,10 @@ export const Message = ({
   role,
   content,
 }: {
-  role: "assistant" | "user";
+  role: "assistant" | "user" | "context";
   content: string | ReactNode;
 }) => {
+  if (role == "context"){return null}
   return (
     <motion.div
       className={`flex flex-row gap-4 px-4 w-full md:w-[500px] md:px-0 first-of-type:pt-20`}
