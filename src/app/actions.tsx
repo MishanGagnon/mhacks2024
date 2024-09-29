@@ -4,6 +4,7 @@ import { CoreMessage, generateId } from "ai";
 import {
   createAI,
   createStreamableValue,
+  getAIState,
   getMutableAIState,
   streamUI,
 } from "ai/rsc";
@@ -21,6 +22,7 @@ const choppedData  = coursesData.slice(0,5)
 const sendMessage = async (message: string) => {
   "use server"
   const messages = getMutableAIState<typeof AI>("messages");
+  const context = getAIState<typeof AI>("context");
 
   messages.update([
     ...(messages.get() as CoreMessage[]),
@@ -31,11 +33,12 @@ const sendMessage = async (message: string) => {
   const textComponent = <TextStreamMessage content={contentStream.value} />;
 
   const classContext = `${JSON.stringify(choppedData)} `;
-
+  console.log(context, "CONTEXT")
   const { value: stream } = await streamUI({
     model: openai("gpt-4o-mini"),
     
     system: `\
+      - ${context}
       - you are a friendly course guide and scheduling assistant
       - here is some context about classes: ${classContext}
       - advise students on what class to take based on context. Do not consider personal interests and career goals
@@ -271,12 +274,14 @@ export type UIState = Array<ReactNode>;
 export type AIState = {
   chatId: string;
   messages: Array<CoreMessage>;
+  context: string
 };
 
 export const AI = createAI<AIState, UIState>({
   initialAIState: {
     chatId: generateId(),
     messages: [],
+    context: ""
   },
   initialUIState: [],
   actions: {
