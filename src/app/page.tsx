@@ -49,12 +49,12 @@ export default function Home() {
   }
   if(exists){
     return <div className="flex flex-row">
-        <FileUpload doCheckCache={false}/>
+        <FileUpload onComplete={()=>{}} doCheckCache={false}/>
         <div>CHAT INTERFACE</div>
     </div>
   }else{
     return <div>
-        <FileUpload doCheckCache = {true}/>
+        <FileUpload onComplete = {()=>setExists(true)} doCheckCache = {true}/>
     </div>
   }
 }

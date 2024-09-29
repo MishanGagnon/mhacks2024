@@ -7,7 +7,7 @@ import { LoadingSpinner } from './spinner';
 import { v4 as uuidv4 } from 'uuid';
 import { json } from 'node:stream/consumers';
 
-export default function FileUpload({ doCheckCache} : any) {
+export default function FileUpload({onComplete, doCheckCache} : any) {
     const [file, setFile] = useState<File | null>(null);
     const [confirm, setConfirm] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -62,12 +62,13 @@ export default function FileUpload({ doCheckCache} : any) {
 
             const data = await response.json();
             setConfirm(true);
+            onComplete();
             console.log(data);
         } catch (error) {
             console.log("Error: Problem with uploading file", error);
             setConfirm(false);
         } finally {
-            setIsLoading(false);
+            setIsLoading(()=>false);
         }
 
         console.log("This is the form data:", formData)
