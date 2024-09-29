@@ -110,7 +110,6 @@ export async function POST(req: Request) {
 
   const uploadDir = path.join(process.cwd(), 'uploads');
   const filePath = path.join(uploadDir, file.name);
-  await fsPromises.writeFile(filePath, buffer);
 
   // Load the PDF and get the first page's dimensions
   const pdfDoc = await PDFDocument.load(buffer);
@@ -129,7 +128,6 @@ export async function POST(req: Request) {
   };
 
   let buffertest = await fromBuffer(buffer, options).bulk(-1, { responseType: 'buffer' });
-  console.log("This is the buffertest output: ",buffertest)
 
   console.log("success image converted")
   let text = await requestPdfCache(uuid, path.parse(file.name).name, buffertest, doCheckCache);

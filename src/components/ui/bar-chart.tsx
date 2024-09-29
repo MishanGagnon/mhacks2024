@@ -53,8 +53,6 @@ const MetricBarChart: React.FC<MetricBarChartProps> = ({ metrics }) => {
 
       <div className="flex flex-col gap-1">
         <div className="flex flex-row gap-2 items-center">
-          <div className="size-3 bg-blue-100 rounded-sm" />
-          <div className="text-xs text-zinc-500">Total</div>
         </div>
       </div>
     </div>

@@ -24,7 +24,7 @@ export const TextStreamMessage = ({
       </div>
 
       <div className="flex flex-col w-full">
-        <div className="text-zinc-800 dark:text-zinc-300 flex flex-col">
+        <div className="text-white  flex flex-col">
           <Markdown>{text}</Markdown>
         </div>
       </div>
@@ -45,12 +45,12 @@ export const Message = ({
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
     >
-      <div className="size-[24px] flex flex-col justify-start items-center flex-shrink-0 text-zinc-400 pt-1">
+      <div className="size-[24px] flex flex-col justify-start items-center flex-shrink-0 text-white pt-1">
         {role === "assistant" ? <BotIcon /> : <UserIcon />}
       </div>
 
       <div className="flex flex-col w-full">
-        <div className="text-zinc-800 dark:text-zinc-300 flex flex-col">
+        <div className="text-white dark:text-zinc-300 flex flex-col">
           {content}
         </div>
       </div>

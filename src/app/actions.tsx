@@ -177,7 +177,7 @@ const sendMessage = async (message: string) => {
         description: "Return a bar chart for course statistics like Workload or Increased Interest",
         parameters: z.object({
           courseCodes: z.array(z.string()), // Accept an array of course codes for comparison
-          metricType: z.enum(['workload', 'increasedInterest']), // Specify which metric to return
+          metricType: z.enum(['Workload', 'Increased Interest']), // Specify which metric to return
         }),
         generate: async function* ({ courseCodes, metricType }) {
           const toolCallId = generateId();
@@ -198,7 +198,7 @@ const sendMessage = async (message: string) => {
             
             return {
               label: course.course_code, // Use course code as label
-              value: metricType === 'workload' ? workload : increasedInterest,
+              value: metricType === 'Workload' ? workload : increasedInterest,
             };
           });
       
