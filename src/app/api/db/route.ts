@@ -3,7 +3,7 @@ import pool from '../../../lib/db';
 
 export async function GET(request : any) {
     try {
-        const res = await pool.query("SELECT * FROM courses WHERE user_id = '960a1621-2e16-43dc-8e34-d499125db487'");
+        const res = await pool.query("DELETE FROM courses");
         return new Response(JSON.stringify(res.rows), {
         status: 200,
         headers: {

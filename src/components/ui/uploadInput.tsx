@@ -52,6 +52,7 @@ export default function FileUpload() {
         formData.append('uuid', uuid || '');
 
         try {
+            
             const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
