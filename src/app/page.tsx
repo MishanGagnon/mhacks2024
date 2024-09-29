@@ -12,7 +12,7 @@ export default function Home() {
   const [uuid, setUUID] = useState<string | null>(null);
   const [exists, setExists] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
-  const [focused, setFocused] = useState<boolean>(false);
+  const [focused, setFocused] = useState<boolean>(true);
 
   useEffect(() => {
     const storedUUID = localStorage.getItem('uuid');
@@ -53,27 +53,28 @@ export default function Home() {
   };
 
   if (loading) {
-    return <LoadingSpinner className="mr-2 h-4 w-4" />;
+    return (
+      <div className="w-screen h-screen flex justify-center items-center bg-gray-100 dark:bg-zinc-900">
+      <LoadingSpinner className="h-16 w-16" />
+    </div>
+    
+    )
   }
 
   if (exists) {
 
     if (focused) {
       return (
-        <div className="">
-          <div className="w-full">
-            <Button
-              onClick={handleToggleFocus}
-              variant="contained"
-              startIcon={<ArrowBackIcon />}
-              sx={{ backgroundColor: 'white', color: 'black', '&:hover': { backgroundColor: 'darkgrey' } }}
-              size="medium"
-            >
-            </Button>
-            <Chat />
-          </div>
+        
+          <div className="w-full h-screen relative bg-gray-100 dark:bg-zinc-900">
+      {/* Absolutely Positioned Button */}
 
-        </div >
+      {/* Chat Component */}
+      <button className="absolute text-black sm:top-6 sm:left-6 md:top-8 md:left-8 z-50 shadow-lg bg-white hover:bg-gray-200 px-4 py-2 rounded" onClick={handleToggleFocus}>
+Upload New Audit</button>
+      <Chat />
+    </div>
+
       )
     }
     else {
@@ -81,7 +82,7 @@ export default function Home() {
         <div className="h-5/6">
           <div className="flex flex-row h-5/6">
             <div className="border-r-2 border-black-500 w-3/6">
-              <FileUpload onComplete={() => setExists(true)} doCheckCache={false} />
+              <FileUpload onComplete={() => handleToggleFocus} doCheckCache={false} />
             </div>
             <div className="w-3/6" onFocus={handleToggleFocus}>
               <Chat />

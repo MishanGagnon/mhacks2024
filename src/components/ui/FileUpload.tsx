@@ -81,7 +81,11 @@ export default function FileUpload({ onComplete, doCheckCache }: any) {
             <div className="mb-10">
                 <h1 className='text-7xl' style={{ fontFamily: ' , sans-serif' }}>UMazing</h1>
             </div>
-            <div className="rounded-3xl bg-gray-100 p-16">
+    
+            <div className="rounded-3xl bg-gray-100 p-12">
+            <div className = "flex justify-center align-center text-center mb-5">
+                <h3>{doCheckCache ?  'Upload an audit checklist' : 'Upload a new audit checklist'}</h3>
+            </div>
                 <form onSubmit={handleSubmit} className="space-y-4 flex flex-col items-center">
                     <Input
                         type="file"

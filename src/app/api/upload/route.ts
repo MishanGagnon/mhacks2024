@@ -28,7 +28,7 @@ async function requestPdfCache(uuid : string, filename : string, buffertest : Bu
     const contents : UserContent = buffertest.map( (buffer) => {return {type: 'image', image : buffer.buffer ?? Buffer.alloc(0)}})
     const { object } = await generateObject({
       model: openai('gpt-4o-mini'),
-      maxTokens: 2048,
+      maxTokens: 3400,
       schema: z.object({
         courses: z.array(
           z.object({
