@@ -26,9 +26,28 @@ async function requestPdfCache(uuid : string, filename : string, buffertest : Bu
     }
 
     const contents : UserContent = buffertest.map( (buffer) => {return {type: 'image', image : buffer.buffer ?? Buffer.alloc(0)}})
+    const outputText  = await generateText({
+      model: openai('gpt-4o-mini'),
+      maxTokens: 3800,
+      temperature: 0.01,
+      system : 'You are a professional table parser, Each cell may contain multiple rows, you must account for this. you never make errors and are elite at your job, for each course row you will find the info for completion (not taken, in-progress, or complete) course_code (2-4 letters followed by numbers, course_name the title of the course (may be unkown in the case of a course that hasnt been taken) credits 1-4 credits or n/a for untaken courses grade letter grades for college course, semester_year will be in format WN 2024, like winter 2024 if taken if not put not taken',
+      messages: [
+        {
+          role: 'user',
+          content: [...contents],
+        },
+        {
+          role: 'user',
+          content: "dont use markdown, make sure to include EVERY detail, includes table so make sure to keep track of everything there, everything missing, and and symbols of relevance "
+        },
+      ]
+    });
+
+    
     const { object } = await generateObject({
       model: openai('gpt-4o-mini'),
-      maxTokens: 3400,
+      maxTokens: 3800,
+      temperature: 0.01,
       schema: z.object({
         courses: z.array(
           z.object({
@@ -44,7 +63,7 @@ async function requestPdfCache(uuid : string, filename : string, buffertest : Bu
       messages: [
         {
           role: 'user',
-          content: [...contents,  {type :'text', text : 'The first cell in the table in the file will indicate whether the course is Completed (Green), In progress (Orange), or Not Complete (Red). Courses without content in the rightmost cell are the ones that are Not Complete. Please get information on all courses in the file with as much relevant information for each. In the case that a course is mentioned but is incomplete (red marker in the first cell) add a row with the following values: course code : actual course code, course title: actual course title, semester year: undefined, grade: undefined, credits: undefined, and completion: incomplete. Try to prevent duplication of courses'}],
+          content: outputText.text,
         },
       ],
     });

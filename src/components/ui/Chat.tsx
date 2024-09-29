@@ -61,11 +61,6 @@ export default function DarkThemedChat() {
     // Return the item at that index
     return searchPlaceholders[randomIndex];
   }
-  let auditDataString = 'This is the students grade info about classes they have completed, in progress, and yet to complete, use this context about their performance and classes taken to answer questions when prompted'
-  if(AuditData){
-    
-    console.log(auditDataString)
-  }
   useEffect(()=>{
     // console.log(getAIState('context'))
     // const test = async ()=> {

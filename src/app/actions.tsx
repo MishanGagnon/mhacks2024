@@ -201,8 +201,22 @@ const sendMessage = async (message: string) => {
           const toolCallId = generateId();
       
           // Filter the courses based on the provided courseCodes
-          const selectedCourses = choppedData.filter(course => courseCodes.includes(course.course_code));
-      
+          // const selectedCourses = choppedData.filter(course => courseCodes.includes(course.course_code));
+          const selectedCourses : any= [];
+          const seenCourseCodes = new Set(); // To avoid duplicates
+
+          courseCodes.forEach((code) => {
+            const results = fuse.search(code);
+
+            const course = results[0].item;
+            // const course1 = result1.length > 0 ? result1[0].item : null;
+            if (!seenCourseCodes.has(course.course_code)) {
+              seenCourseCodes.add(course.course_code);
+              selectedCourses.push(course);
+            }
+            ;
+          });
+
           if (selectedCourses.length === 0) {
             return (
               <Message role="assistant" content={<p>No courses found for the provided codes.</p>} />
@@ -210,7 +224,7 @@ const sendMessage = async (message: string) => {
           }
       
           // Prepare metrics for the selected metric type
-          const metrics = selectedCourses.map(course => {
+          const metrics = selectedCourses.map((course : any)=> {
             const workload = course.Workload ? parseFloat(course.Workload) : 0; // Default to 0 if undefined
             const increasedInterest = course["Increased_Interest"] ? parseFloat(course["Increased_Interest"]) : 0; // Default to 0 if undefined
             const desireToTake = course["Desire_to_take"] ? parseFloat(course["Desire_to_take"]) : 0; // Default to 0 if undefined

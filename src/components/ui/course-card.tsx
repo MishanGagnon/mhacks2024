@@ -45,8 +45,11 @@ const CourseCard = (
         <h3 className="text-xl text-gray-400">{course.title || ""}</h3>
       </div>
       <div className="mb-4">
-        <p><strong>Workload:</strong> {course.Workload || ""}</p>
-        <p><strong>Increased_Interest:</strong> {course.Increased_Interest || ""}</p>
+        <p><strong>Workload: </strong> {course.Workload || ""}</p>
+        <p><strong>Increased Interest in Subject:</strong> {course.Increased_Interest || ""}</p>
+        <p><strong>Expectations:</strong> {course.Expectations || ""}</p>
+        <p><strong>Desire to take:</strong> {course.Desire_to_take || ""}</p>
+        <p><strong>Understanding: </strong> {course.Understanding || ""}</p>
       </div>
       <p className="text-gray-300">{course.description || ""}</p>
     </div>
