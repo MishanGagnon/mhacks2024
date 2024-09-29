@@ -19,6 +19,7 @@ import { div } from "framer-motion/client";
 import Markdown from "react-markdown";
 import { CourseCardProps } from "@/components/ui/course-card";
 import MetricBarChart from "@/components/ui/bar-chart";
+import ScatterPlot from "@/components/ui/scatter-plot";
 
 
 const choppedData  = coursesData.slice(0,coursesData.length)
@@ -192,7 +193,7 @@ const sendMessage = async (message: string) => {
         },
       },
       getMetricsBarChart: {
-        description: "Return a bar chart for course statistics like Workload, Increased Interest, Desire to take, Understanding, and Expectations",
+        description: "ONLY IF THE USER REQUESTS A BAR CHART use this tool and indentify the type of metric (Workload)",
         parameters: z.object({
           courseCodes: z.array(z.string()), // Accept an array of course codes for comparison
           metricType: z.enum(['Workload', 'Increased Interest', 'Desire_to_take', 'Understanding', 'Expectations']), // Updated metric name
@@ -280,7 +281,69 @@ const sendMessage = async (message: string) => {
             } />
           );
         },
-      },      
+      },
+      scatterPlotTool: {
+        description: "Generates a scatter plot for two course attributes. Use this tool when the user requests a comparison of two metrics across courses. (Desire to take and understanding)",
+        parameters: z.object({
+          courseCodes: z.array(z.string()), // Accept an array of course codes for comparison
+          xMetricType: z.enum(['Workload', 'Desire_to_take', 'Understanding', 'Expectations']), // Specify which metric to use for x-axis
+          yMetricType: z.enum(['Workload', 'Desire_to_take', 'Understanding', 'Expectations']), // Specify which metric to use for y-axis
+        }),
+        generate: async function* ({ courseCodes, xMetricType, yMetricType }) {
+          const toolCallId = generateId();
+      
+          // Filter the courses based on the provided courseCodes
+          const selectedCourses = choppedData.filter(course => courseCodes.includes(course.course_code));
+      
+          if (selectedCourses.length === 0) {
+            return (
+              <Message role="assistant" content={<p>No courses found for the provided codes.</p>} />
+            );
+          }
+      
+          // Prepare data for the ScatterPlot component
+          const metrics = selectedCourses.map(course => {
+            const workload = course.Workload ? parseFloat(course.Workload) : 0;
+            const desireToTake = course.Desire_to_take ? parseFloat(course.Desire_to_take) : 0;
+            const understanding = course.Understanding ? parseFloat(course.Understanding) : 0;
+            const expectations = course.Expectations ? parseFloat(course.Expectations) : 0;
+      
+            return {
+              label: course.course_code,
+              xMetric: xMetricType === 'Workload' ? workload : 
+                        xMetricType === 'Desire_to_take' ? desireToTake : 
+                        xMetricType === 'Understanding' ? understanding : 
+                        xMetricType === 'Expectations' ? expectations : 0,
+              yMetric: yMetricType === 'Desire_to_take' ? desireToTake : 
+                        yMetricType === 'Understanding' ? understanding : 
+                        yMetricType === 'Expectations' ? expectations : 0,
+            };
+          });
+      
+          // Check if metrics are empty after mapping
+          if (metrics.length === 0) {
+            return (
+              <Message role="assistant" content={<div className="text-red-500">Error: No valid metrics found for the selected courses.</div>} />
+            );
+          }
+      
+          // Prepare scatter data for the ScatterPlot
+          const scatterData = metrics.map(metric => ({
+            x: metric.xMetric,
+            y: metric.yMetric,
+            label: metric.label
+          }));
+      
+          return (
+            <Message role="assistant" content={<ScatterPlot 
+              xMetric={xMetricType} 
+              yMetric={yMetricType} 
+              data={scatterData} 
+            />} />
+          );
+        },
+      },
+                  
       // getCourseCard: {
       //   description: "If someone asks for details about a single course give use THIS tool",
       //   parameters: z.object({

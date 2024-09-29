@@ -15,7 +15,7 @@ export const TextStreamMessage = ({
 
   return (
     <motion.div
-      className={`flex flex-row gap-2 px-4 w-full md:w-[800px] md:px-0 first-of-type:pt-4`}
+      className={`flex flex-row gap-2 px-4 w-full md:px-0 first-of-type:pt-4`}
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
     >
@@ -41,7 +41,7 @@ export const Message = ({
 }) => {
   return (
     <motion.div
-      className={`flex flex-row gap-2 px-4 w-full md:w-[800px] md:px-0 first-of-type:pt-4`}
+      className={`flex flex-row gap-2 px-4 w-full md:px-0 first-of-type:pt-4`}
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
     >

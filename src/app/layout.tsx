@@ -5,8 +5,11 @@ import { AI } from "./actions";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ai-sdk-preview-rsc-genui.vercel.dev"),
-  title: "Generative User Interfaces Preview",
-  description: "Generative UI with React Server Components and Vercel AI SDK",
+  title: "UMazing",
+  description: "Generative UI meetings advising!",
+  icons: {
+    icon: './favicon.ico', // /public path
+  },
 };
 
 export default function RootLayout({
@@ -16,6 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+      <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body>
         <Toaster position="top-center" richColors />
         <AI>{children}</AI>

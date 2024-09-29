@@ -42,9 +42,9 @@ export default function DarkThemedChat() {
     { title: "Show me a class", label: "What is EECS 370?", action: "What is EECS 370?" },
     { title: "Compare classes", label: "Compare EECS 183 with EECS 110", action: "Compare EECS 183 with EECS 110" },
     {
-      title: "Give me a schedule",
-      label: "What classes should I take in my remaining semesters to graduate on time?",
-      action: "What classes should I take for my remaining semesters to graduate on time?",
+      title: "Scatter plot course info",
+      label: "Give me a scatter plot for desire to take and understanding for 10 EECS classes",
+      action: "Give me a scatter plot for 10 EECS classes between the metrics Desire to Take and Understanding ",
     },
     {
       title: "Ask for personal suggestions",
@@ -61,6 +61,7 @@ export default function DarkThemedChat() {
     // Return the item at that index
     return searchPlaceholders[randomIndex];
   }
+
   useEffect(()=>{
     // console.log(getAIState('context'))
     // const test = async ()=> {
@@ -137,7 +138,7 @@ export default function DarkThemedChat() {
       <div className="flex flex-col justify-between gap-4 w-full max-w-3xl">
         <div
           ref={messagesContainerRef}
-          className="flex flex-col gap-3 h-full w-full items-center overflow-y-scroll"
+          className="flex flex-col gap-3 mt-10  h-full w-full items-center overflow-y-scroll"
         >
           {messages.length === 0 && (
             <motion.div className="h-[350px] px-4 w-full md:w-[500px] md:px-0 pt-20">
@@ -186,8 +187,8 @@ export default function DarkThemedChat() {
                   }}
                   className="w-full text-left border border-zinc-200  rounded-lg p-2 text-sm hover:bg-zinc-700 dark:hover:bg-zinc-800 transition-colors flex flex-col"
                 >
-                  <span className="font-medium">{action.title}</span>
-                  <span className="text-white">
+                  <span className="font-medium ">{action.title}</span>
+                  <span className="text-zinc-400">
                     {action.label}
                   </span>
                 </button>

@@ -14,7 +14,7 @@ const MetricBarChart: React.FC<MetricBarChartProps> = ({ metrics }) => {
   const valueToHeight = scaleLinear().domain([0, maxValue]).range([0, 150]);
 
   return (
-    <div className="md:max-w-[452px] max-w-[calc(100dvw-80px)] w-full pb-6 flex flex-col gap-4">
+    <div className="md:max-w-[452px] flex max-w-[calc(100dvw-80px)] w-full pb-6 flex flex-col p-10 gap-4">
       <div className="flex flex-col">
         <div className="text-zinc-500 text-sm">Average Value</div>
         <div className="font-semibold">
@@ -24,7 +24,7 @@ const MetricBarChart: React.FC<MetricBarChartProps> = ({ metrics }) => {
 
       <div className="flex flex-row justify-center  w-full h-[150px] items-end">
         {metrics.map((metric) => (
-          <div key={metric.label} className="text-sm flex flex-col items-center gap-1">
+          <div key={metric.label} className="text-sm flex p-3 flex-col items-center gap-1">
             <motion.div
               className="rounded-md"
               initial={{ height: 0 }}
